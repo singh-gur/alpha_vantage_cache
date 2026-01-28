@@ -9,7 +9,7 @@
 
 server:
   host: "0.0.0.0"
-  port: 8080
+  port: 8085
   read_timeout: 60s
   write_timeout: 60s
   idle_timeout: 120s
@@ -45,7 +45,17 @@ cache:
       ttl: 60s
       match_query_params:
         function: ["TIME_SERIES_INTRADAY"]
-      cache_key_query_params: ["function", "symbol", "interval", "adjusted", "extended_hours", "month", "outputsize", "datatype"]
+      cache_key_query_params:
+        [
+          "function",
+          "symbol",
+          "interval",
+          "adjusted",
+          "extended_hours",
+          "month",
+          "outputsize",
+          "datatype",
+        ]
 
     # Real-time quotes
     - path: "/query"
@@ -69,7 +79,15 @@ cache:
       ttl: 60s
       match_query_params:
         function: ["FX_INTRADAY"]
-      cache_key_query_params: ["function", "from_symbol", "to_symbol", "interval", "outputsize", "datatype"]
+      cache_key_query_params:
+        [
+          "function",
+          "from_symbol",
+          "to_symbol",
+          "interval",
+          "outputsize",
+          "datatype",
+        ]
 
     # Intraday crypto
     - path: "/query"
@@ -77,7 +95,8 @@ cache:
       ttl: 60s
       match_query_params:
         function: ["CRYPTO_INTRADAY"]
-      cache_key_query_params: ["function", "symbol", "market", "interval", "outputsize", "datatype"]
+      cache_key_query_params:
+        ["function", "symbol", "market", "interval", "outputsize", "datatype"]
 
     # Realtime options
     - path: "/query"
@@ -114,7 +133,8 @@ cache:
       ttl: 3600s
       match_query_params:
         function: ["FX_DAILY"]
-      cache_key_query_params: ["function", "from_symbol", "to_symbol", "outputsize", "datatype"]
+      cache_key_query_params:
+        ["function", "from_symbol", "to_symbol", "outputsize", "datatype"]
 
     # Daily crypto
     - path: "/query"
@@ -159,7 +179,8 @@ cache:
       ttl: 21600s
       match_query_params:
         function: ["FX_WEEKLY"]
-      cache_key_query_params: ["function", "from_symbol", "to_symbol", "datatype"]
+      cache_key_query_params:
+        ["function", "from_symbol", "to_symbol", "datatype"]
 
     # Weekly crypto
     - path: "/query"
@@ -188,7 +209,8 @@ cache:
       ttl: 43200s
       match_query_params:
         function: ["FX_MONTHLY"]
-      cache_key_query_params: ["function", "from_symbol", "to_symbol", "datatype"]
+      cache_key_query_params:
+        ["function", "from_symbol", "to_symbol", "datatype"]
 
     # Monthly crypto
     - path: "/query"
@@ -208,7 +230,17 @@ cache:
       methods: ["GET"]
       ttl: 86400s
       match_query_params:
-        function: ["OVERVIEW", "ETF_PROFILE", "INCOME_STATEMENT", "BALANCE_SHEET", "CASH_FLOW", "DIVIDENDS", "SPLITS", "SHARES_OUTSTANDING"]
+        function:
+          [
+            "OVERVIEW",
+            "ETF_PROFILE",
+            "INCOME_STATEMENT",
+            "BALANCE_SHEET",
+            "CASH_FLOW",
+            "DIVIDENDS",
+            "SPLITS",
+            "SHARES_OUTSTANDING",
+          ]
       cache_key_query_params: ["function", "symbol"]
 
     # Listing status
@@ -256,8 +288,41 @@ cache:
       methods: ["GET"]
       ttl: 300s
       match_query_params_regex:
-        function: ["^(SMA|EMA|WMA|DEMA|TEMA|TRIMA|KAMA|MAMA|VWAP|T3|MACD|MACDEXT|STOCH|STOCHF|RSI|STOCHRSI|WILLR|ADX|ADXR|APO|PPO|MOM|BOP|CCI|CMO|ROC|ROCR|AROON|AROONOSC|MFI|TRIX|ULTOSC|DX|MINUS_DI|PLUS_DI|MINUS_DM|PLUS_DM|BBANDS|MIDPOINT|MIDPRICE|SAR|TRANGE|ATR|NATR|AD|ADOSC|OBV|HT_TRENDLINE|HT_SINE|HT_TRENDMODE|HT_DCPERIOD|HT_DCPHASE|HT_PHASOR)$"]
-      cache_key_query_params: ["function", "symbol", "interval", "time_period", "series_type", "month", "datatype", "fastperiod", "slowperiod", "signalperiod", "fastmatype", "slowmatype", "signalmatype", "fastkperiod", "slowkperiod", "slowdperiod", "slowkmatype", "slowdmatype", "fastdperiod", "fastdmatype", "matype", "timeperiod1", "timeperiod2", "timeperiod3", "nbdevup", "nbdevdn", "acceleration", "maximum"]
+        function:
+          [
+            "^(SMA|EMA|WMA|DEMA|TEMA|TRIMA|KAMA|MAMA|VWAP|T3|MACD|MACDEXT|STOCH|STOCHF|RSI|STOCHRSI|WILLR|ADX|ADXR|APO|PPO|MOM|BOP|CCI|CMO|ROC|ROCR|AROON|AROONOSC|MFI|TRIX|ULTOSC|DX|MINUS_DI|PLUS_DI|MINUS_DM|PLUS_DM|BBANDS|MIDPOINT|MIDPRICE|SAR|TRANGE|ATR|NATR|AD|ADOSC|OBV|HT_TRENDLINE|HT_SINE|HT_TRENDMODE|HT_DCPERIOD|HT_DCPHASE|HT_PHASOR)$",
+          ]
+      cache_key_query_params:
+        [
+          "function",
+          "symbol",
+          "interval",
+          "time_period",
+          "series_type",
+          "month",
+          "datatype",
+          "fastperiod",
+          "slowperiod",
+          "signalperiod",
+          "fastmatype",
+          "slowmatype",
+          "signalmatype",
+          "fastkperiod",
+          "slowkperiod",
+          "slowdperiod",
+          "slowkmatype",
+          "slowdmatype",
+          "fastdperiod",
+          "fastdmatype",
+          "matype",
+          "timeperiod1",
+          "timeperiod2",
+          "timeperiod3",
+          "nbdevup",
+          "nbdevdn",
+          "acceleration",
+          "maximum",
+        ]
 
     # =========================================================================
     # COMMODITIES (1 hour TTL)
@@ -267,7 +332,21 @@ cache:
       methods: ["GET"]
       ttl: 3600s
       match_query_params:
-        function: ["WTI", "BRENT", "NATURAL_GAS", "COPPER", "ALUMINUM", "WHEAT", "CORN", "COTTON", "SUGAR", "COFFEE", "ALL_COMMODITIES", "GOLD_SILVER_HISTORY"]
+        function:
+          [
+            "WTI",
+            "BRENT",
+            "NATURAL_GAS",
+            "COPPER",
+            "ALUMINUM",
+            "WHEAT",
+            "CORN",
+            "COTTON",
+            "SUGAR",
+            "COFFEE",
+            "ALL_COMMODITIES",
+            "GOLD_SILVER_HISTORY",
+          ]
       cache_key_query_params: ["function", "interval", "datatype"]
 
     # =========================================================================
@@ -279,7 +358,19 @@ cache:
       methods: ["GET"]
       ttl: 21600s
       match_query_params:
-        function: ["REAL_GDP", "REAL_GDP_PER_CAPITA", "TREASURY_YIELD", "FEDERAL_FUNDS_RATE", "CPI", "INFLATION", "RETAIL_SALES", "DURABLES", "UNEMPLOYMENT", "NONFARM_PAYROLL"]
+        function:
+          [
+            "REAL_GDP",
+            "REAL_GDP_PER_CAPITA",
+            "TREASURY_YIELD",
+            "FEDERAL_FUNDS_RATE",
+            "CPI",
+            "INFLATION",
+            "RETAIL_SALES",
+            "DURABLES",
+            "UNEMPLOYMENT",
+            "NONFARM_PAYROLL",
+          ]
       cache_key_query_params: ["function", "interval", "maturity", "datatype"]
 
     # =========================================================================
@@ -292,7 +383,16 @@ cache:
       ttl: 900s
       match_query_params:
         function: ["NEWS_SENTIMENT"]
-      cache_key_query_params: ["function", "tickers", "topics", "time_from", "time_to", "sort", "limit"]
+      cache_key_query_params:
+        [
+          "function",
+          "tickers",
+          "topics",
+          "time_from",
+          "time_to",
+          "sort",
+          "limit",
+        ]
 
     - path: "/query"
       methods: ["GET"]
@@ -307,7 +407,15 @@ cache:
       ttl: 3600s
       match_query_params:
         function: ["ANALYTICS_FIXED_WINDOW", "ANALYTICS_SLIDING_WINDOW"]
-      cache_key_query_params: ["function", "symbols", "range", "interval", "window_size", "calculations"]
+      cache_key_query_params:
+        [
+          "function",
+          "symbols",
+          "range",
+          "interval",
+          "window_size",
+          "calculations",
+        ]
 
     # =========================================================================
     # FALLBACK (5 minute TTL)
@@ -317,7 +425,21 @@ cache:
     - path: "/query"
       methods: ["GET"]
       ttl: 300s
-      cache_key_query_params: ["function", "symbol", "interval", "outputsize", "datatype", "from_currency", "to_currency", "from_symbol", "to_symbol", "market", "time_period", "series_type"]
+      cache_key_query_params:
+        [
+          "function",
+          "symbol",
+          "interval",
+          "outputsize",
+          "datatype",
+          "from_currency",
+          "to_currency",
+          "from_symbol",
+          "to_symbol",
+          "market",
+          "time_period",
+          "series_type",
+        ]
 
 rate_limit:
   enabled: true

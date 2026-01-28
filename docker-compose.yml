@@ -20,7 +20,7 @@ services:
     image: regv2.gsingh.io/personal/api_cache:main
     container_name: alpha-vantage-cache-proxy
     ports:
-      - "8080:8080"
+      - "8085:8085"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
     environment:

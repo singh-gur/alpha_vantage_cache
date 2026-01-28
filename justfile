@@ -1,6 +1,5 @@
 # Alpha Vantage Cache - Justfile
 # Run `just` or `just --list` to see all available recipes
-
 # ============================================================================
 # SERVICES
 # ============================================================================
@@ -11,7 +10,7 @@ up:
     docker-compose up -d
     @echo ""
     @echo "Services started:"
-    @echo "  - API Cache Proxy: http://localhost:8080"
+    @echo "  - API Cache Proxy: http://localhost:8085"
     @echo "  - Valkey:          localhost:6379"
 
 # Stop all services
@@ -49,7 +48,7 @@ rebuild:
 # Check if services are healthy
 health:
     @echo "Checking service health..."
-    @curl -s http://localhost:8080/health | jq '.' || echo "Service not responding on port 8080"
+    @curl -s http://localhost:8085/health | jq '.' || echo "Service not responding on port 8085"
 
 # Check Valkey connectivity
 valkey-ping:
@@ -84,37 +83,37 @@ cache-monitor:
 # ============================================================================
 # TESTING
 # ============================================================================
-
 # Test cache with a sample Alpha Vantage request
+
 # Usage: just test-cache FUNCTION SYMBOL [API_KEY]
 test-cache function="TIME_SERIES_DAILY" symbol="IBM" api_key="demo":
-    @echo "Testing cache with {{function}} for {{symbol}}..."
+    @echo "Testing cache with {{ function }} for {{ symbol }}..."
     @echo "First request (cache MISS):"
-    curl -s "http://localhost:8080/query?function={{function}}&symbol={{symbol}}&apikey={{api_key}}" | jq '.metadata' 2>/dev/null || echo "Response received"
+    curl -s "http://localhost:8085/query?function={{ function }}&symbol={{ symbol }}&apikey={{ api_key }}" | jq '.metadata' 2>/dev/null || echo "Response received"
     @echo ""
     @echo "Second request (cache HIT):"
-    curl -s "http://localhost:8080/query?function={{function}}&symbol={{symbol}}&apikey={{api_key}}" | jq '.metadata' 2>/dev/null || echo "Response received"
+    curl -s "http://localhost:8085/query?function={{ function }}&symbol={{ symbol }}&apikey={{ api_key }}" | jq '.metadata' 2>/dev/null || echo "Response received"
     @echo ""
     @echo "Check X-Cache header for HIT/MISS:"
-    curl -sI "http://localhost:8080/query?function={{function}}&symbol={{symbol}}&apikey={{api_key}}" | grep -i "x-cache"
+    curl -sI "http://localhost:8085/query?function={{ function }}&symbol={{ symbol }}&apikey={{ api_key }}" | grep -i "x-cache"
 
 # Test intraday endpoint (1 min TTL)
 test-intraday symbol="IBM":
-    just test-cache "TIME_SERIES_INTRADAY" "{{symbol}}"
+    just test-cache "TIME_SERIES_INTRADAY" "{{ symbol }}"
 
 # Test daily endpoint (1 hour TTL)
 test-daily symbol="IBM":
-    just test-cache "TIME_SERIES_DAILY" "{{symbol}}"
+    just test-cache "TIME_SERIES_DAILY" "{{ symbol }}"
 
 # Test global quote endpoint (1 min TTL)
 test-quote symbol="IBM":
-    just test-cache "GLOBAL_QUOTE" "{{symbol}}"
+    just test-cache "GLOBAL_QUOTE" "{{ symbol }}"
 
 # Test currency exchange endpoint (1 min TTL)
 test-currency from="USD" to="EUR":
-    @echo "Testing currency exchange rate for {{from}}/{{to}}..."
+    @echo "Testing currency exchange rate for {{ from }}/{{ to }}..."
     @echo "First request (cache MISS):"
-    curl -s "http://localhost:8080/query?function=CURRENCY_EXCHANGE_RATE&from_currency={{from}}&to_currency={{to}}&apikey=demo" | jq '.RealtimeCurrencyExchangeRate' 2>/dev/null || echo "Response received"
+    curl -s "http://localhost:8085/query?function=CURRENCY_EXCHANGE_RATE&from_currency={{ from }}&to_currency={{ to }}&apikey=demo" | jq '.RealtimeCurrencyExchangeRate' 2>/dev/null || echo "Response received"
 
 # ============================================================================
 # DEVELOPMENT
@@ -150,7 +149,7 @@ info:
     @echo "========================"
     @echo ""
     @echo "Architecture:"
-    @echo "  Client -> API Cache Proxy (8080) -> Alpha Vantage API"
+    @echo "  Client -> API Cache Proxy (8085) -> Alpha Vantage API"
     @echo "                      |"
     @echo "                 Valkey Cache"
     @echo ""

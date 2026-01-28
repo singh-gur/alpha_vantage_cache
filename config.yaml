@@ -1,0 +1,341 @@
+# Alpha Vantage API Cache Configuration
+# All requests go through: Client -> Cache Proxy (port 8080) -> Alpha Vantage API
+#
+# Usage:
+#   curl "http://localhost:8080/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=YOUR_KEY"
+#
+# The apikey is passed through to Alpha Vantage but NOT included in cache keys,
+# so all users share the same cached data (which is identical regardless of API key).
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 60s
+  write_timeout: 60s
+  idle_timeout: 120s
+
+valkey:
+  host: "valkey"
+  port: 6379
+  password: ""
+  db: 0
+  max_retries: 3
+  pool_size: 10
+  min_idle_conns: 5
+
+upstream:
+  base_url: "https://www.alphavantage.co"
+  timeout: 60s
+  max_idle_conns: 100
+  max_conns_per_host: 10
+
+cache:
+  default_ttl: 300s
+  max_ttl: 86400s
+
+  endpoints:
+    # =========================================================================
+    # REAL-TIME / INTRADAY DATA (1 minute TTL)
+    # Data changes frequently during market hours
+    # =========================================================================
+
+    # Intraday time series (stocks)
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["TIME_SERIES_INTRADAY"]
+      cache_key_query_params: ["function", "symbol", "interval", "adjusted", "extended_hours", "month", "outputsize", "datatype"]
+
+    # Real-time quotes
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["GLOBAL_QUOTE", "REALTIME_BULK_QUOTES"]
+      cache_key_query_params: ["function", "symbol", "datatype"]
+
+    # Exchange rates (forex + crypto)
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["CURRENCY_EXCHANGE_RATE", "CRYPTO_EXCHANGE_RATE"]
+      cache_key_query_params: ["function", "from_currency", "to_currency"]
+
+    # Intraday forex
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["FX_INTRADAY"]
+      cache_key_query_params: ["function", "from_symbol", "to_symbol", "interval", "outputsize", "datatype"]
+
+    # Intraday crypto
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["CRYPTO_INTRADAY"]
+      cache_key_query_params: ["function", "symbol", "market", "interval", "outputsize", "datatype"]
+
+    # Realtime options
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["REALTIME_OPTIONS"]
+      cache_key_query_params: ["function", "symbol", "contract", "datatype"]
+
+    # Top gainers/losers + market status - changes throughout trading day
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 60s
+      match_query_params:
+        function: ["TOP_GAINERS_LOSERS", "MARKET_STATUS"]
+      cache_key_query_params: ["function"]
+
+    # =========================================================================
+    # DAILY DATA (1 hour TTL)
+    # Updates once per day after market close
+    # =========================================================================
+
+    # Daily stock time series
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["TIME_SERIES_DAILY", "TIME_SERIES_DAILY_ADJUSTED"]
+      cache_key_query_params: ["function", "symbol", "outputsize", "datatype"]
+
+    # Daily forex
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["FX_DAILY"]
+      cache_key_query_params: ["function", "from_symbol", "to_symbol", "outputsize", "datatype"]
+
+    # Daily crypto
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["DIGITAL_CURRENCY_DAILY"]
+      cache_key_query_params: ["function", "symbol", "market", "datatype"]
+
+    # Historical options
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["HISTORICAL_OPTIONS"]
+      cache_key_query_params: ["function", "symbol", "date", "datatype"]
+
+    # Gold & silver spot prices
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["GOLD_SILVER_SPOT"]
+      cache_key_query_params: ["function", "symbol", "datatype"]
+
+    # =========================================================================
+    # WEEKLY DATA (6 hour TTL)
+    # Updates once per week
+    # =========================================================================
+
+    # Weekly stock time series
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["TIME_SERIES_WEEKLY", "TIME_SERIES_WEEKLY_ADJUSTED"]
+      cache_key_query_params: ["function", "symbol", "datatype"]
+
+    # Weekly forex
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["FX_WEEKLY"]
+      cache_key_query_params: ["function", "from_symbol", "to_symbol", "datatype"]
+
+    # Weekly crypto
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["DIGITAL_CURRENCY_WEEKLY"]
+      cache_key_query_params: ["function", "symbol", "market", "datatype"]
+
+    # =========================================================================
+    # MONTHLY DATA (12 hour TTL)
+    # Updates once per month
+    # =========================================================================
+
+    # Monthly stock time series
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 43200s
+      match_query_params:
+        function: ["TIME_SERIES_MONTHLY", "TIME_SERIES_MONTHLY_ADJUSTED"]
+      cache_key_query_params: ["function", "symbol", "datatype"]
+
+    # Monthly forex
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 43200s
+      match_query_params:
+        function: ["FX_MONTHLY"]
+      cache_key_query_params: ["function", "from_symbol", "to_symbol", "datatype"]
+
+    # Monthly crypto
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 43200s
+      match_query_params:
+        function: ["DIGITAL_CURRENCY_MONTHLY"]
+      cache_key_query_params: ["function", "symbol", "market", "datatype"]
+
+    # =========================================================================
+    # FUNDAMENTAL DATA (24 hour TTL)
+    # Quarterly/annual reports, rarely changes
+    # =========================================================================
+
+    # Company fundamentals
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 86400s
+      match_query_params:
+        function: ["OVERVIEW", "ETF_PROFILE", "INCOME_STATEMENT", "BALANCE_SHEET", "CASH_FLOW", "DIVIDENDS", "SPLITS", "SHARES_OUTSTANDING"]
+      cache_key_query_params: ["function", "symbol"]
+
+    # Listing status
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 86400s
+      match_query_params:
+        function: ["LISTING_STATUS"]
+      cache_key_query_params: ["function", "date", "state", "datatype"]
+
+    # Symbol search (static reference data)
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 86400s
+      match_query_params:
+        function: ["SYMBOL_SEARCH"]
+      cache_key_query_params: ["function", "keywords", "datatype"]
+
+    # =========================================================================
+    # EARNINGS DATA (6 hour TTL)
+    # Updates around earnings season
+    # =========================================================================
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["EARNINGS", "EARNINGS_ESTIMATES"]
+      cache_key_query_params: ["function", "symbol"]
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["EARNINGS_CALENDAR", "IPO_CALENDAR"]
+      cache_key_query_params: ["function", "symbol", "horizon"]
+
+    # =========================================================================
+    # TECHNICAL INDICATORS (5 minute TTL)
+    # Derived from price data, updates with market
+    # =========================================================================
+
+    # All technical indicators via regex - too many to list individually
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 300s
+      match_query_params_regex:
+        function: ["^(SMA|EMA|WMA|DEMA|TEMA|TRIMA|KAMA|MAMA|VWAP|T3|MACD|MACDEXT|STOCH|STOCHF|RSI|STOCHRSI|WILLR|ADX|ADXR|APO|PPO|MOM|BOP|CCI|CMO|ROC|ROCR|AROON|AROONOSC|MFI|TRIX|ULTOSC|DX|MINUS_DI|PLUS_DI|MINUS_DM|PLUS_DM|BBANDS|MIDPOINT|MIDPRICE|SAR|TRANGE|ATR|NATR|AD|ADOSC|OBV|HT_TRENDLINE|HT_SINE|HT_TRENDMODE|HT_DCPERIOD|HT_DCPHASE|HT_PHASOR)$"]
+      cache_key_query_params: ["function", "symbol", "interval", "time_period", "series_type", "month", "datatype", "fastperiod", "slowperiod", "signalperiod", "fastmatype", "slowmatype", "signalmatype", "fastkperiod", "slowkperiod", "slowdperiod", "slowkmatype", "slowdmatype", "fastdperiod", "fastdmatype", "matype", "timeperiod1", "timeperiod2", "timeperiod3", "nbdevup", "nbdevdn", "acceleration", "maximum"]
+
+    # =========================================================================
+    # COMMODITIES (1 hour TTL)
+    # =========================================================================
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["WTI", "BRENT", "NATURAL_GAS", "COPPER", "ALUMINUM", "WHEAT", "CORN", "COTTON", "SUGAR", "COFFEE", "ALL_COMMODITIES", "GOLD_SILVER_HISTORY"]
+      cache_key_query_params: ["function", "interval", "datatype"]
+
+    # =========================================================================
+    # ECONOMIC INDICATORS (6 hour TTL)
+    # Government data, updates infrequently
+    # =========================================================================
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 21600s
+      match_query_params:
+        function: ["REAL_GDP", "REAL_GDP_PER_CAPITA", "TREASURY_YIELD", "FEDERAL_FUNDS_RATE", "CPI", "INFLATION", "RETAIL_SALES", "DURABLES", "UNEMPLOYMENT", "NONFARM_PAYROLL"]
+      cache_key_query_params: ["function", "interval", "maturity", "datatype"]
+
+    # =========================================================================
+    # ALPHA INTELLIGENCE (15 minute TTL)
+    # News and sentiment, updates throughout day
+    # =========================================================================
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 900s
+      match_query_params:
+        function: ["NEWS_SENTIMENT"]
+      cache_key_query_params: ["function", "tickers", "topics", "time_from", "time_to", "sort", "limit"]
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 900s
+      match_query_params:
+        function: ["INSIDER_TRANSACTIONS", "EARNINGS_CALL_TRANSCRIPT"]
+      cache_key_query_params: ["function", "symbol"]
+
+    # Analytics - derived data, cache for 1 hour
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 3600s
+      match_query_params:
+        function: ["ANALYTICS_FIXED_WINDOW", "ANALYTICS_SLIDING_WINDOW"]
+      cache_key_query_params: ["function", "symbols", "range", "interval", "window_size", "calculations"]
+
+    # =========================================================================
+    # FALLBACK (5 minute TTL)
+    # Catches any unmatched /query requests
+    # =========================================================================
+
+    - path: "/query"
+      methods: ["GET"]
+      ttl: 300s
+      cache_key_query_params: ["function", "symbol", "interval", "outputsize", "datatype", "from_currency", "to_currency", "from_symbol", "to_symbol", "market", "time_period", "series_type"]
+
+rate_limit:
+  enabled: true
+  # Alpha Vantage free tier: 25 requests/day
+  # Premium tiers: 75/min (standard), 150/min (premium), etc.
+  # Rate limits apply to upstream requests (cache misses)
+  requests_per_second: 5
+  burst: 10
+
+retry:
+  enabled: true
+  max_attempts: 3
+  initial_backoff: 500ms
+  max_backoff: 5s
+  backoff_multiplier: 2.0
+  retryable_status_codes: [500, 502, 503, 504, 429]
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"

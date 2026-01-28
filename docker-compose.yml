@@ -1,0 +1,39 @@
+services:
+  # Valkey (Redis fork) for caching
+  valkey:
+    image: valkey/valkey:latest
+    container_name: alpha-vantage-cache-valkey
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # API Cache Proxy - sits between clients and Alpha Vantage API
+  api-cache:
+    image: regv2.gsingh.io/personal/api_cache:main
+    container_name: alpha-vantage-cache-proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+    depends_on:
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  valkey_data:

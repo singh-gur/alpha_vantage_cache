@@ -7,7 +7,7 @@
 # Start all services
 up:
     @echo "Starting Alpha Vantage cache services..."
-    docker-compose up -d
+    docker compose up -d
     @echo ""
     @echo "Services started:"
     @echo "  - API Cache Proxy: http://localhost:8085"
@@ -16,7 +16,7 @@ up:
 # Stop all services
 down:
     @echo "Stopping services..."
-    docker-compose down
+    docker compose down
     @echo "Services stopped"
 
 # Restart all services
@@ -24,21 +24,21 @@ restart: down up
 
 # View logs from all services
 logs:
-    docker-compose logs -f
+    docker compose logs -f
 
 # View logs for proxy service
 logs-proxy:
-    docker-compose logs -f api-cache
+    docker compose logs -f api-cache
 
 # View logs for valkey service
 logs-valkey:
-    docker-compose logs -f valkey
+    docker compose logs -f valkey
 
 # Full rebuild (pull latest images and recreate containers)
 rebuild:
     @echo "Pulling latest images and rebuilding..."
-    docker-compose pull
-    docker-compose up -d --force-recreate
+    docker compose pull
+    docker compose up -d --force-recreate
     @echo "Rebuild complete"
 
 # ============================================================================
@@ -131,7 +131,7 @@ fmt:
 config:
     @echo "Config file: $(pwd)/config.yaml"
 
-# Show docker-compose file location
+# Show docker compose file location
 compose-file:
     @echo "Docker Compose file: $(pwd)/docker-compose.yml"
 
